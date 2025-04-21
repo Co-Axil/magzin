@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="section product-detail">
+    <div class="columns">
+        <div class="column is-6-desktop is-12-mobile">
+            <div class="box">
+                <!-- Asosiy rasm -->
+                <figure class="image product-detail-image">
+                    <img id="mainImage" src="{{ product.image.url }}" alt="{{ product.title }}">
+                </figure>
+
+                <!-- Kichik rasmlar -->
+                <div class="thumbnails" style="display: flex; gap: 10px; margin-top: 10px;">
+                    {% for image in product.images.all %}
+                        <img src="{{ image.image.url }}" alt="Thumbnail" class="thumbnail" 
+                             onclick="changeMainImage('{{ image.image.url }}')" 
+                             style="width: 80px; height: 80px; cursor: pointer; border: 2px solid transparent;">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="column is-6-desktop is-12-mobile">
+            <div class="content">
+                <p class="title is-size-3">
+                    {{ product.title }}
+                    {% if product.is_new %}
+                        <span class="tag is-danger">New!</span>
+                    {% endif %}
+                    {% if product.is_discounted %}
+                        <span class="tag is-primary">Discount! -20%</span>
+                    {% endif %}
+                </p>
+                <p class="title is-size-3 has-text-info">{{ product.price }} $</p>
+                <p class="title is-size-5 has-text-grey-light">0 отзывов</p>
+                <p class="title">Brand: {{ product.brand }}</p>
+                <p class="has-text-weight-bold has-text-success">
+                    {% if product.in_stock %}
+                        <span class="tag is-success is-light">Есть в наличии</span>
+                    {% else %}
+                        <span class="tag is-danger is-light">Нет в наличии</span>
+                    {% endif %}
+                </p>
+
+                <p class="title is-size-4">
+                    Поделится:
+                    <span class="is-size-4 mx-3">
+                        <a href="#"><ion-icon name="logo-whatsapp"></ion-icon></a>
+                        <a href="#"><ion-icon name="logo-youtube"></ion-icon></a>
+                        <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
+                    </span>
+                </p>
+
+                <a href="{% url 'rate_product' product.pk %}" class="button is-warning">Leave review</a>
+                <a href="{% url 'product_list' %}" class="button is-danger">Back to main</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeMainImage(imageUrl) {
+        document.getElementById('mainImage').src = imageUrl;
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="columns">
+        <!-- Buyurtma formasi -->
+        <div class="column is-5">
+            <div class="box">
+                <h2 class="title is-4">Buyurtma ma'lumotlari</h2>
+                <form method="post" id="orderForm" action="{% url 'create_order' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Viloyat tanlash -->
+                    <div class="field">
+                        <label class="label">Viloyat</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                {{ form.region }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tuman tanlash -->
+                    <div class="field">
+                        <label class="label">Tuman/Shahar</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                {{ form.district }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filial tanlash -->
+                    <div class="field">
+                        <label class="label">Filial</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                {{ form.branch }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Telefon raqam -->
+                    <div class="field">
+                        <label class="label">Telefon raqam</label>
+                        <div class="control">
+                            {{ form.phone }}
+                        </div>
+                        {% if form.phone.errors %}
+                            <p class="help is-danger">{{ form.phone.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Manzil -->
+                    <div class="field">
+                        <label class="label">To'liq manzil</label>
+                        <div class="control">
+                            {{ form.address }}
+                        </div>
+                        {% if form.address.errors %}
+                            <p class="help is-danger">{{ form.address.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="field">
+                        <div class="control">
+                            <button type="submit" class="button is-primary is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                </span>
+                                <span>Buyurtmani tasdiqlash</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Savatdagi mahsulotlar -->
+        <div class="column is-7">
+            <div class="box">
+                <h2 class="title is-4">Savatdagi mahsulotlar</h2>
+                <a class="button is-danger is-outlined mb-4" href="{% url 'cart' %}">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Savatga qaytish</span>
+                </a>
+                
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped">
+                        <thead>
+                            <tr>
+                                <th>Rasm</th>
+                                <th>Mahsulot</th>
+                                <th>Narxi</th>
+                                <th>Miqdori</th>
+                                <th>Jami</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr>
+                                <td>
+                                    <figure class="image is-64x64">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+                                    </figure>
+                                </td>
+                                <td>{{ item.product.title }}</td>
+                                <td>{{ item.product.price }} so'm</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.total_price }} so'm</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4">Umumiy summa</th>
+                                <th>{{ cart_total }} so'm</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AJAX scriptlari -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    // Viloyat o'zgarganda tumanlarni yuklash
+    $("#id_region").change(function(){
+        var regionId = $(this).val();
+        if(regionId){
+            $.ajax({
+                url: "{% url 'load_districts' %}",
+                data: {'region_id': regionId},
+                success: function(data){
+                    $("#id_district").html(data);
+                    $("#id_branch").html('<option value="">Filialni tanlang</option>');
+                }
+            });
+        } else {
+            $("#id_district").html('<option value="">Tumanni tanlang</option>');
+            $("#id_branch").html('<option value="">Filialni tanlang</option>');
+        }
+    });
+    
+    // Tuman o'zgarganda filiallarni yuklash
+    $("#id_district").change(function(){
+        var districtId = $(this).val();
+        if(districtId){
+            $.ajax({
+                url: "{% url 'load_branches' %}",
+                data: {'district_id': districtId},
+                success: function(data){
+                    $("#id_branch").html(data);
+                }
+            });
+        } else {
+            $("#id_branch").html('<option value="">Filialni tanlang</option>');
+        }
+    });
+});
+</script>
+{% endblock %}

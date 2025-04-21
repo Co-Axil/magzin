@@ -1,0 +1,16 @@
+{% extends "order-change_list.html" %}
+{% block result_list %}
+    {{ block.super }}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tr.model-order");
+            rows.forEach(row => {
+                const orderId = row.dataset.objectId;
+                const detailsLink = document.createElement("a");
+                detailsLink.href = `/admin/onlinemarket/order/${orderId}/details/`;
+                detailsLink.textContent = "View Details";
+                row.querySelector(".field-id").appendChild(detailsLink);
+            });
+        });
+    </script>
+{% endblock %}

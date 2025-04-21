@@ -1,0 +1,31 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<canvas id="productChart"></canvas>
+
+<script>
+    fetch("/api/product-chart/")  // views.py da yaratgan API'ni chaqiramiz
+    .then(response => response.json())
+    .then(data => {
+        let ctx = document.getElementById('productChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.categories,
+                datasets: [{
+                    label: 'Mahsulotlar soni',
+                    data: data.totals,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>

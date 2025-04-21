@@ -1,0 +1,40 @@
+from django.urls import path
+from .views import (slide_list_api, search_image_list_api, order_product_api, order_list_api, product_list_api, product_detail_api, category_list_api, 
+                    brand_list_api, cart_api, delete_cart_item_api, create_order_api, 
+                    
+                    rate_product_api,products_list,
+                    cart,
+                    delete_cart_item,
+                    edit_cart_item,
+                    product_detail,
+                    create_order,
+                    rate_product,
+                    orders, create_order, load_districts, load_branches)
+
+urlpatterns = [
+    path('api/products/', product_list_api, name='product_list_api'),
+    path('api/products/<int:pk>/', product_detail_api, name='product_detail_api'),
+    path('api/categories/', category_list_api, name='category_list_api'),
+    path('api/brands/', brand_list_api, name='brand_list_api'),
+    path('api/cart/', cart_api, name='cart_api'),
+    path('api/cart/<int:pk>/', delete_cart_item_api, name='delete_cart_item_api'),
+    path('api/orders/', create_order_api, name='create_order_api'),
+    path('  /', order_list_api, name='order_list_api'),
+    path('api/products/<int:pk>/rate/', rate_product_api, name='rate_product_api'),
+    path('api/orderproduct/', order_product_api, name='order_product_api'),
+    path('api/searchimage/', search_image_list_api, name='search_image_list_api'),
+    path('api/slidelist', slide_list_api, name='slide_list_api'),
+    
+    path('', products_list, name='product_list'),
+    path('cart/', cart, name='cart'),
+    path('item/<int:pk>/delete/', delete_cart_item, name='delete_item'),
+    path('edit_cart_item<int:pk>/', edit_cart_item, name='edit_cart_item'),
+    path('product/<int:pk>/detail/', product_detail, name='product_detail'),
+    path('cart/create_order/item/', create_order, name='create_order'),
+    path('rate_product/<int:pk>/', rate_product, name='rate_product'),
+    path('orders/', orders, name='orders'),
+    path('', products_list, name='products_list'),
+    path('ajax/load-districts/', load_districts, name='load_districts'),
+    path('ajax/load-branches/', load_branches, name='load_branches'),
+    path('create_order/', create_order, name='create_order'),
+]
