@@ -41,6 +41,8 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'admin_tabler.apps.AdminTablerConfig',
+    'drf_yasg',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,9 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'onlinemarket',
     'users',
-    'rest_framework',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,7 +124,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False
+}
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -141,3 +150,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_yasg.openapi.AutoSchema'  
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'VERSION': '1.0.0',
+}
+INSTALLED_APPS += ['corsheaders']
+MIDDLEWARE += ['corsheaders.middleware.CorsMiddleware']
+CORS_ORIGIN_ALLOW_ALL = True
