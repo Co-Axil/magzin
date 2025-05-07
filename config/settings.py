@@ -4,14 +4,7 @@ Django settings for config project.
 
 from pathlib import Path
 import os
-import sentry_sdk  # Yangi qo'shilgan
 
-# Sentry monitoring uchun (environmentdan DSN olish)
-sentry_sdk.init(
-    dsn=os.environ.get('SENTRY_DSN'),
-    traces_sample_rate=0.5,
-    profiles_sample_rate=0.5,
-)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
