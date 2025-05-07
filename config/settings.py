@@ -18,7 +18,6 @@ ALLOWED_HOSTS = ['*']  # Aniq domainlar
 INSTALLED_APPS = [
     'admin_tabler.apps.AdminTablerConfig',
     'rest_framework',
-    'corsheaders',  # CORS oldiga o'tkazildi
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,7 +30,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # CORS eng oldinda
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
