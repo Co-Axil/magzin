@@ -11,7 +11,7 @@ from .views import ( order_list_api, product_list_api, product_detail_api, categ
                     create_order,
                     
                     orders, create_order )
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
 
 urlpatterns = [
     path('api/products/', product_list_api, name='product_list_api'),

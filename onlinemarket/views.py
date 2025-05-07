@@ -13,13 +13,9 @@ from django.db import models
 from .serializers import (ProductSerializer, CategorySerializer, 
                            CartItemSerializer, OrderSerializer ,TableSerializer
                           )
-from drf_yasg.utils import swagger_auto_schema
 
-@swagger_auto_schema(
-    method='get',
-    operation_description="Mahsulotlar ro'yxatini olish",
-    responses={200: ProductSerializer(many=True)}
-)
+
+
 # ✅ Mahsulotlar ro‘yxati API
 @api_view(['GET'])
 def product_list_api(request):
