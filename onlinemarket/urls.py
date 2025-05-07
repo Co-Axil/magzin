@@ -22,8 +22,6 @@ urlpatterns = [
     path('api/cart/<int:pk>/', delete_cart_item_api, name='delete_cart_item_api'),
     path('api/orders/', create_order_api, name='create_order_api'),
     path('api/orderlist/', order_list_api, name='order_list_api'),
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('', products_list, name='product_list'),
     path('cart/', cart, name='cart'),
     path('item/<int:pk>/delete/', delete_cart_item, name='delete_item'),
