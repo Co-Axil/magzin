@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security settings - Production uchun MUST!
 SECRET_KEY = os.environ.get('SECRET_KEY')  # Environmentdan olinadi
 DEBUG = False
-ALLOWED_HOSTS = ['Smth013.com', 'api.Smth013.com', '127.0.0.1']  # Aniq domainlar
+ALLOWED_HOSTS = ['*']  # Aniq domainlar
 
 # Application definition
 INSTALLED_APPS = [
