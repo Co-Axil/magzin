@@ -1,25 +1,16 @@
 from rest_framework import serializers
-from .models import Product, Brand, Category, Slide, CartItem, Order, OrderProduct, Review, SearchImage
-
+from .models import Product, Category,  CartItem, Order, Table
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
-        fields = '__all__'  # Barcha maydonlarni JSONga o‘tkazadi
+        model = Product  # Product modeli to'g'ri import qilinganligiga ishonch hosil qiling
+        fields = "__all__"
 
-class BrandSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Brand
-        fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
 
-class SlideSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Slide
-        fields = '__all__'
 
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,17 +22,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = '__all__'
 
-class OrderProductSerializer(serializers.ModelSerializer):
+class TableSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderProduct
-        fields = '__all__'
-
-class ReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Review
-        fields = '__all__'
-
-class SearchImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SearchImage
-        fields = '__all__'
+        model = Table
+        fields = ['id', 'number']

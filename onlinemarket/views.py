@@ -6,14 +6,20 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from .models import Product, Category, Brand, Slide, CartItem, Order, OrderProduct, Review, SearchImage, District, Branch, Region
+from .models import Product, Category, CartItem, Order, Table, OrderProduct
 from django.contrib.auth.decorators import login_required
-from .forms import OrderForm, RateForm
+from .forms import OrderForm
 from django.db import models
-from .serializers import (ProductSerializer, CategorySerializer, BrandSerializer, 
-                          SlideSerializer, CartItemSerializer, OrderSerializer, 
-                          OrderProductSerializer, ReviewSerializer, SearchImageSerializer)
+from .serializers import (ProductSerializer, CategorySerializer, 
+                           CartItemSerializer, OrderSerializer ,TableSerializer
+                          )
+from drf_yasg.utils import swagger_auto_schema
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Mahsulotlar ro'yxatini olish",
+    responses={200: ProductSerializer(many=True)}
+)
 # ✅ Mahsulotlar ro‘yxati API
 @api_view(['GET'])
 def product_list_api(request):
@@ -35,26 +41,7 @@ def category_list_api(request):
     serializer = CategorySerializer(categories, many=True)
     return Response(serializer.data)
 
-# ✅ Brendlar API
-@api_view(['GET'])
-def brand_list_api(request):
-    brands = Brand.objects.all()
-    serializer = BrandSerializer(brands, many=True)
-    return Response(serializer.data)
 
-# ✅ Slayder API
-@api_view(['GET'])
-def slide_list_api(request):
-    slides = Slide.objects.all()
-    serializer = SlideSerializer(slides, many=True)
-    return Response(serializer.data)
-
-# ✅ Qidiruv rasmi API
-@api_view(['GET'])
-def search_image_list_api(request):
-    images = SearchImage.objects.all()
-    serializer = SearchImageSerializer(images, many=True)
-    return Response(serializer.data)
 
 # ✅ Savat API (Qo‘shish yoki ko‘rish)
 @api_view(['GET', 'POST'])
@@ -94,21 +81,14 @@ def create_order_api(request):
     cart_items = CartItem.objects.filter(customer=request.user)
     total_price = sum([item.total_price() for item in cart_items])
     
-    order = Order.objects.create(
+    Order = Order.objects.create(
         address=request.data.get('address'),
         phone=request.data.get('phone'),
         total_price=total_price,
         customer=request.user
     )
 
-    for cart_item in cart_items:
-        OrderProduct.objects.create(
-            order=order,
-            product=cart_item.product,
-            amount=cart_item.quantity,
-            total=cart_item.total_price(),
-        )
-    
+  
     cart_items.delete()
     return Response({"message": "Buyurtma yaratildi!"}, status=status.HTTP_201_CREATED)
 
@@ -127,18 +107,14 @@ def order_product_api(request):
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
-# ✅ Izoh qoldirish API
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def rate_product_api(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    serializer = ReviewSerializer(data=request.data)
-    
-    if serializer.is_valid():
-        serializer.save(user=request.user, product=product)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+def table_list_api(request):
+    if request.user.is_authenticated:
+        tables = Table.objects.all()
+        serializer = TableSerializer(tables, many=True)
+        return Response(serializer.data)
+    else:
+        return Response({'error': 'Unauthorized'}, status=401)
 
 # ✅ Diagramma uchun statistika API
 
@@ -148,34 +124,14 @@ def rate_product_api(request, pk):
 
 @login_required(login_url='users/sign_in')
 def products_list(request):
-    products = Product.objects.all().order_by('-is_hot', '-id')
     products = Product.objects.all().order_by('-id')
     categories = Category.objects.all()
-    brands = Brand.objects.all()
-    slides = Slide.objects.all()
-
     category = request.GET.get('category')
-    brand = request.GET.get('brand')
-    search_query = request.GET.get('search', '')
-
-    # Kategoriya bo‘yicha filtratsiya
     if category:
         products = products.filter(category=category)
 
-    # Brend bo‘yicha filtratsiya
-    if brand:
-        products = products.filter(brand=brand)
-
-    # Qidiruv natijalarini chiqarish
-    if search_query:
-        products = products.filter(
-            models.Q(title__icontains=search_query) |
-            models.Q(description__icontains=search_query)
-        )
-
-    # Admin paneldan mos keladigan rasmni topamiz va mahsulotlar qatoriga qo‘shamiz
-    pinned_image = SearchImage.objects.filter(keyword__iexact=search_query, is_pinned=True).first()
-
+  
+    
     product_id = request.GET.get('product')
     if product_id:
         try:
@@ -195,9 +151,7 @@ def products_list(request):
     context = {
         "products": products,
         "categories": categories,
-        "brands": brands,
-        "slides": slides,
-        "pinned_image": pinned_image,  # Pinned qilingan rasm
+        
     }
     return render(request, 'product_list.html', context)
 
@@ -238,42 +192,48 @@ def product_detail(request, pk):
     product = Product.objects.get(pk=pk)
     images = product.images.all()
     return render(request, 'product_detail.html', {"product": product})
-
-
-@login_required
 def create_order(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
     cart_items = CartItem.objects.filter(customer=request.user)
     total_price = sum([item.total_price() for item in cart_items])
-    form = OrderForm(request.POST or None)
-
-    if request.method == 'POST' and form.is_valid():
-        order = form.save(commit=False)
-        order.customer = request.user
-        order.total_price = total_price
-        order.save()
-        
-        for cart_item in cart_items:
-            OrderProduct.objects.create(order=order, product=cart_item.product, amount=cart_item.quantity, total=cart_item.total_price())
-        
-        cart_items.delete()
-        return redirect('cart')
-
-    return render(request, 'order_creation_page.html', {'form': form, 'cart_items': cart_items, 'total_price': total_price})
-
-def rate_product(request, pk):
-    product = Product.objects.get(pk=pk)
-    reviews = Review.objects.filter(product=product)
-
+    amount = sum([item.quantity for item in cart_items])
+    
     if request.method == 'POST':
-        form = RateForm(request.POST)
+        form = OrderForm(request.POST)
         if form.is_valid():
-            rating = form.save(commit=False)
-            rating.user = request.user
-            rating.product = product
-            rating.save()
-            return redirect('rate_product', pk=pk)
-    form = RateForm()
-    return render(request, 'rate.html', {'form': form, 'product': product, 'reviews': reviews})
+            # Order yaratish
+            order = form.save(commit=False)
+            order.customer = request.user
+            order.total_price = total_price
+            order.amount = amount  # 👈 amount ni qo'shing
+            order.save()
+            
+            # OrderProduct yaratish
+            for cart_item in cart_items:
+                OrderProduct.objects.create(
+                    order=order,
+                    product=cart_item.product,
+                    amount=cart_item.quantity,
+                    total=cart_item.total_price(),
+                )
+            
+            # Tanlangan stolni band qilish
+            order.table.is_available = False
+            order.table.save()
+            
+            cart_items.delete()
+            return redirect('cart')
+    else:
+        form = OrderForm()
+    
+    return render(request, 'order_creation_page.html', {
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'amount': amount,
+        'form': form
+    })
 
 
 
@@ -283,16 +243,20 @@ def orders(request):
         return render(request, 'orders.html', {'orders':order_list})
     else:
         return redirect('sign_up')
+def Tables(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     
-def load_districts(request):
-    region_id = request.GET.get('region_id')
-    districts = District.objects.filter(region_id=region_id).order_by('name')
-    return render(request, 'dropdown_list_options.html', {'items': districts})
-
-def load_branches(request):
-    district_id = request.GET.get('district_id')
-    branches = Branch.objects.filter(district_id=district_id).order_by('name')
-    return render(request, 'dropdown_list_options.html', {'items': branches})    
-
+    if request.method == 'POST':
+        form = TableForm(request.POST)
+        if form.is_valid():
+            selected_table = form.cleaned_data['tables']
+            # Tanlangan stolni sessiyaga saqlash
+            request.session['selected_table'] = selected_table.id
+            return redirect('create_order')
+    else:
+        form = TableForm()
+    
+    return render(request, 'dropdown_list_options.html', {'form': form})
 
 

@@ -5,21 +5,12 @@ from django.core.exceptions import ValidationError
 
 class Product(models.Model):
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, max_length=70)
     description = models.TextField()
     price = models.IntegerField()
-    is_new = models.BooleanField(default=False)
-    is_discounted = models.BooleanField(default=False)
     category = models.ForeignKey('Category', default=False, on_delete=models.CASCADE)
-    is_hot = models.BooleanField(default=False, verbose_name="Hot Mahsulotmi?")
-    brand = models.ForeignKey('Brand', default=None, on_delete=models.CASCADE)
     image = models.ImageField(
         default='default_product.png', null=True, upload_to='product_img'
     )
-    sale_product_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    
-    # yangi maydon:
-    in_stock = models.BooleanField(default=True, verbose_name='Есть в наличии')
 
     def __str__(self):
         return self.name
@@ -37,12 +28,7 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.title}"
 
-class Brand(models.Model):
-    name = models.CharField(max_length=50)
-    icon = models.ImageField(upload_to='brands_icon')
 
-    def __str__(self):
-        return self.name
 
 
 class Category(models.Model):
@@ -52,8 +38,7 @@ class Category(models.Model):
         return self.name
 
 
-class Slide(models.Model):
-    image = models.ImageField(upload_to='slide_images')
+
 
 
 class CartItem(models.Model):
@@ -69,42 +54,31 @@ class CartItem(models.Model):
 
 
 
-class Region(models.Model):
-    name = models.CharField(max_length=100)
+
+class Table(models.Model):
+    number = models.PositiveIntegerField(unique=True)
+    is_available = models.BooleanField(default=True)  # Yangi maydon qo'shildi
     
     def __str__(self):
-        return self.name
-
-class District(models.Model):
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    
-    def __str__(self):
-        return f"{self.name} ({self.region.name})"
-
-class Branch(models.Model):
-    district = models.ForeignKey(District, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    address = models.TextField()
-    
-    def __str__(self):
-        return f"{self.name} - {self.district.name}"
+        return f"Stol {self.number}"
 
 
+# from django.db import models
+# from django.contrib.auth import get_user_model
 
-# Buyurtma modeli
+# User = get_user_model()
+
 class Order(models.Model):
-    address = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
     total_price = models.IntegerField()
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
-    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
-    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True)
-
+    table = models.ForeignKey('Table', on_delete=models.PROTECT, verbose_name="Stol raqami")
+    amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Mijoz")
 
     def __str__(self):
-        return 'Order # %s' % (str(self.id))
+        return f"Buyurtma #{self.id} | Stol: {self.table.number}"
+# Buyurtma modeli
+
 
 
 class OrderProduct(models.Model):
@@ -112,40 +86,6 @@ class OrderProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     amount = models.IntegerField()
     total = models.IntegerField()
-    
 
     def __str__(self):
-        return '%s x%s - %s' % (self.product, self.amount, self.order.customer.username)
-
-
-RATE_CHOICES = [
-    (1, '🗑️ - Trash'),
-    (2, '👎 - Bad'),
-    (3, '😐 - Ok'),
-    (4, '👍 - Good'),
-    (5, '🌟 - Perfect'),
-]
-
-
-class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    text = models.TextField(max_length=300, blank=True)
-    rate = models.PositiveBigIntegerField(choices=RATE_CHOICES, null=True)
-
-    def __str__(self):
-        return self.user.username
-
-
-
-class SearchImage(models.Model):
-    keyword = models.CharField(max_length=255, unique=True, verbose_name="Qidiruv Kalit So'zi")
-    image = models.ImageField(upload_to='search_images/', verbose_name="Rasm")
-    is_pinned = models.BooleanField(default=True, verbose_name="Natijalarga Pinned qilsinmi?")
-
-    def __str__(self):
-        return f"{self.keyword} (Pinned: {self.is_pinned})"
-
-
-
+        return f'{self.product} x{self.amount} - {self.order.customer.username}'

@@ -3,7 +3,7 @@
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render, get_object_or_404
-from .models import Order, OrderProduct
+from .models import Order
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -17,16 +17,7 @@ class OrderAdmin(admin.ModelAdmin):
         ]
         return custom_urls + urls
 
-    def order_details(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id)
-        order_products = OrderProduct.objects.filter(order=order)
-        context = dict(
-            self.admin_site.each_context(request),
-            order=order,
-            order_products=order_products,
-        )
-        return render(request, 'admin/order_details.html', context)
-
+    
     def customer_name(self, obj):
         return obj.customer.username
     customer_name.short_description = 'Customer Name'
