@@ -3,25 +3,19 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
 
-# Swagger uchun schema sozlamalari
-schema_view = get_schema_view(
-    openapi.Info(
-        title="OnlineMarket API",
-        default_version='v1',
-        description="API Documentation",
-        terms_of_service="https://yourapp.com/terms/",
-        contact=openapi.Contact(email="contact@magzin.com"),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-))
+from rest_framework import permissions
+# Swagger dokumentatsiya
 
 urlpatterns = [
-    # Swagger dokumentatsiya
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('admin/', admin.site.urls),
+    
+    path('', include('onlinemarket.urls')),
+    path('users/', include('users.urls')),
+    path('', include('admin_tabler.urls')),
+    path('', TemplateView.as_view(template_name="base.html"), name="home"),  # Bosh sahifa
+    path('products/', include('onlinemarket.urls')),  # App uchun URLlar
+
     
     # Admin panel
     path('admin/', admin.site.urls),
