@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ['*']  # Aniq domainlar
 
 # Application definition
 INSTALLED_APPS = [
-    'admin_tabler.apps.AdminTablerConfig',
+    'jazzmin',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
