@@ -68,14 +68,19 @@ class Table(models.Model):
 
 # User = get_user_model()
 
+
+
 class Order(models.Model):
     total_price = models.IntegerField()
     table = models.ForeignKey('Table', on_delete=models.PROTECT, verbose_name="Stol raqami")
     amount = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Mijoz")
-
-    def __str__(self):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=1)  #
+    
+    
+    
+def __str__(self):
         return f"Buyurtma #{self.id} | Stol: {self.table.number}"
 # Buyurtma modeli
 

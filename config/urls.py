@@ -8,8 +8,7 @@ from rest_framework import permissions
 # Swagger dokumentatsiya
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    
+ 
     path('', include('onlinemarket.urls')),
     path('users/', include('users.urls')),
     path('', include('admin_tabler.urls')),
